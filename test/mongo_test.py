@@ -8,4 +8,3 @@ while True:
     for doc in cursor:
         print(doc)
     time.sleep(1)
-    print
