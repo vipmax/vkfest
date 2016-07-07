@@ -1,25 +1,31 @@
 # coding=utf-8
-
 import concurrent.futures
 import time
 import vk
 import pymongo
 
-vk_posts_collection = pymongo.MongoClient(host="192.168.13.110")['Test']['vk_posts_collection']
+
 
 tags = [u'#spb', u'#saint', u'#питер', u'#спб', u'#санктпетербург', u'#санкт-петербург']
 timeout = 100
 
+
 def task(tag, request_timeout):
     vkapi = vk.API(vk.Session(), v='5.20', lang='ru', timeout=request_timeout)
+    vk_posts_collection = pymongo.MongoClient(host="192.168.13.110")['Test']['vk_posts']
+
     added_count = 0
     posts = vkapi.newsfeed.search(q=tag, count='200')['items']
     for post in posts:
         key = {'_id': "{}_{}".format(post['owner_id'], post['id'])}
         fields = {'$set': post}
-        # updated_result = vk_posts_collection.update(key, fields, True, False)
-        added_count += not 1
-        # print(key)
+        try:
+            updated_result = vk_posts_collection.update(key, fields, True, False)
+            added_count += not updated_result['updatedExisting']
+            if not updated_result['updatedExisting']:
+                print("added =", key)
+        except:
+            pass
     return added_count
 
 
@@ -39,4 +45,11 @@ def start():
         time.sleep(10)
 
 
-# start()
+if __name__ == '__main__':
+    try:
+        pymongo.MongoClient(host="192.168.13.110")['Test'].create_collection('vk_posts', capped=True, size=99999999999)
+        print("Table created")
+    except:
+        print("Table already created")
+
+    start()

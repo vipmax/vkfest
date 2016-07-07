@@ -7,11 +7,13 @@ import sentiment_analisys
 from post import Post
 from multiprocessing.pool import ThreadPool
 import time, random
+
 # reload(sys)
 # sys.setdefaultencoding('UTF8')
 
 buffer = SortedSet()
 lock = threading.Lock()
+
 
 def add_toBuffer(post):
     if post not in buffer:
@@ -24,11 +26,11 @@ def add_toBuffer(post):
         # critical section end
         # lock.release()
 
+
 def get(from_timestamp, count):
     index = buffer.bisect_left(Post({'date': from_timestamp}))
     data = buffer[index: index + count]
     return data
-
 
 
 # just while testing
@@ -44,7 +46,7 @@ def add_posts():
         print(post['date'])
 
 
-add_posts()
+# add_posts()
 #
 #
 # def job(tag):
@@ -66,8 +68,23 @@ add_posts()
 # pool.join()
 
 
-#
+import pymongo
+import time
+
+
+def stream_new_posts():
+    db = pymongo.MongoClient("192.168.13.110").Test
+    coll = db.vk_posts
+    cursor = coll.find(cursor_type=pymongo.CursorType.TAILABLE_AWAIT)
+    while True:
+        for doc in cursor:
+            print(doc)
+            add_toBuffer(Post(doc))
+        time.sleep(1)
+        print()
+
+
 # import crawler
-#
-# thread = threading.Thread(target=crawler.start)
-# thread.start()
+
+thread = threading.Thread(target=stream_new_posts)
+thread.start()
