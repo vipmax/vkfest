@@ -42,7 +42,7 @@ def start():
                 except Exception as e:
                     print(u"{} generated an exception {}".format(url, e))
 
-        time.sleep(10)
+        time.sleep(1)
 
 
 if __name__ == '__main__':

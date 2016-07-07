@@ -28,8 +28,16 @@ def add_toBuffer(post):
 
 
 def get(from_timestamp, count):
+    if from_timestamp == -1:
+        data = buffer[-count:0]
+        for d in data:
+            print(data['date'])
+        return data
+
     index = buffer.bisect_left(Post({'date': from_timestamp}))
     data = buffer[index: index + count]
+    for d in data:
+        print(d['date'])
     return data
 
 
