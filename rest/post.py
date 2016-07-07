@@ -4,6 +4,15 @@ class Post:
     def __init__(self, data):
         self.data = data
 
+        if 'attachments' in data:
+            for a in data['attachments']:
+                if a['type'] == 'photo':
+                    sizes = list(filter(lambda p: p.startswith('photo'), a['photo'].keys()))
+                    maxsize = max(list(map(lambda p: int(p.replace("photo_",'')), sizes)))
+                    data['photo_url'] = a['photo']['photo_' + str(maxsize)]
+                    break
+
+
     def get(self, key):
         return self.data[key]
 

@@ -1,15 +1,11 @@
 # coding=utf-8
-import sys
 import threading
 import vk
 from sortedcontainers import SortedSet
 import sentiment_analisys
 from post import Post
-from multiprocessing.pool import ThreadPool
-import time, random
-
-# reload(sys)
-# sys.setdefaultencoding('UTF8')
+import pymongo
+import time
 
 buffer = SortedSet()
 lock = threading.Lock()
@@ -21,6 +17,10 @@ def add_toBuffer(post):
         post['sentiment_result'] = sentiment_result
         # lock.acquire()
         # critical section start
+        if len(buffer) > 10000:
+            print('deleting ' + str(buffer[0]))
+            del buffer[0]
+
         buffer.add(post)
         print('buffer len = {}'.format(len(buffer)))
         # critical section end
@@ -29,9 +29,9 @@ def add_toBuffer(post):
 
 def get(from_timestamp, count):
     if from_timestamp == -1:
-        data = buffer[-count:0]
+        data = buffer[-count:]
         for d in data:
-            print(data['date'])
+            print(d['date'])
         return data
 
     index = buffer.bisect_left(Post({'date': from_timestamp}))
@@ -54,30 +54,10 @@ def add_posts():
         print(post['date'])
 
 
+# for testing
 # add_posts()
-#
-#
-# def job(tag):
-#     print tag
-#     while True:
-#         print "da"
-#         vkapi = vk.API(vk.Session(), v='5.20', lang='ru', timeout=100)
-#         posts = vkapi.newsfeed.search(q=tag, latitude='59.939145', longitude='30.315699', count='200')['items']
-#         for p in posts: add_toBuffer(Post(p))
-#         # time.sleep(random.randint(0, 10))
-#
-#
-# pool = ThreadPool(12)
-#
-# # pool.map(job, [u'spb', u'saint', u'питер', u'спб', u'санктпетербург'])
-# pool.map(job, [u'#spb', u'#saint', u'#питер', u'#спб', u'#санктпетербург'])
-#
-# # pool.close()
-# pool.join()
 
 
-import pymongo
-import time
 
 
 def stream_new_posts():
@@ -91,8 +71,6 @@ def stream_new_posts():
         time.sleep(1)
         print()
 
-
-# import crawler
 
 thread = threading.Thread(target=stream_new_posts)
 thread.start()

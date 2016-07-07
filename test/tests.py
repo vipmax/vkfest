@@ -2,10 +2,11 @@
 import time
 import geopy
 import geopy.distance
+import re
+import requests
 import vk
 from datetime import datetime
 
-# vkapi = vk.API(vk.Session(), v='5.20', lang='ru', timeout=100)
 #
 
 
@@ -18,6 +19,7 @@ def get_news_by_time():
     end = to_unixtime(datetime.now())
     data = set()
     while (True):
+        vkapi = vk.API(vk.Session(), v='5.20', lang='ru', timeout=100)
         posts = vkapi.newsfeed.search(q='spb', latitude='59.939145', longitude='30.315699', count='200',
                                       end_time=end, start_time=start)
         for post in posts['items']:
@@ -26,14 +28,17 @@ def get_news_by_time():
 
         end = end - day
         start = start - day
-        print len(data)
+        print(len(data))
 
 
 # get_news_by_time()
 
 
 def grid_analysing():
+    vkapi = vk.API(vk.Session(), v='5.20', lang='ru', timeout=100)
     build_id = lambda post: 'https://vk.com/feed?w=wall{}_{}'.format(post['owner_id'], post['id'])
+    to_unixtime = lambda datetime_: int(time.mktime(datetime_.timetuple()))
+    from_unixtime = lambda utime: datetime.fromtimestamp(utime)
 
     def extract_posts(latitude, longitude):
         return {build_id(post) for post in vkapi.newsfeed.search(q='#spb',
@@ -70,8 +75,8 @@ def grid_analysing():
         destination = distance.destination(point=current_point, bearing=180)
         current_point = geopy.Point(destination.latitude, destination.longitude)
         current_posts = extract_posts(current_point.latitude, current_point.longitude)
-        print "{0}, {1}".format(str(destination.latitude), str(destination.longitude)), len(first_posts),\
-            len(current_posts), len(first_posts.intersection(current_posts))
+        print("{0}, {1}".format(str(destination.latitude), str(destination.longitude)), len(first_posts),\
+            len(current_posts), len(first_posts.intersection(current_posts)))
         first_posts = current_posts
 
 
@@ -89,20 +94,155 @@ def sorted_containers_test():
     start = time.time()
     for i in range(1000000):
         ss.add(random.randint(0, i))
-    print "adding elapsed ", time.time() - start
+    print("adding elapsed ", time.time() - start)
     start = time.time()
-    print ss[10]
-    print "getting elapsed", time.time() - start
+    print(ss[10])
+    print("getting elapsed", time.time() - start)
 
 
 # sorted_containers_test()
 
 
-import json
+def jdon_test():
+    import json
+    listok = {u'привет': u'медвед'}
+    data = json.dumps(listok)
+    print('Json: %s' % data)
+    new_obj = json.loads(data)
+    print('Python obj: %s' % new_obj)
 
-listok = {u'привет': u'медвед'}
-data = json.dumps(listok)
-print('Json: %s' % data)
 
-new_obj = json.loads(data)
-print('Python obj: %s' % new_obj)
+# jdon_test()
+
+
+
+
+
+geohash = '8NTZtoXr'
+
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0',
+    'Accept': 'application/json, text/javascript, */*; q=0.01',
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    'X-Requested-With': 'XMLHttpRequest'
+}
+
+data = {
+    "act": "show_photo_more",
+    "al": 1,
+    "geohash": geohash,
+    "offset": 0,
+    "photo_skip": '0_',
+}
+
+s = requests.Session()
+
+content = s.post('https://vk.com/al_places.php', data=data, headers=headers)
+
+html = content.content.decode('utf-8')
+
+prog = re.compile('href="\/photo(\w+)"')
+
+
+photo_ids = list(prog.findall(html))
+
+for p in photo_ids:
+    print(p)
+
+vkapi = vk.API(vk.Session(), v='5.20', lang='ru', timeout=100)
+photos = vkapi.photos.getById(photos=','.join(photo_ids))
+
+for p in photos:
+    print(p)
+
+
+
+
+['8NTZtoXr',
+'8NTZtoc8',
+'8NTZto0w',
+'8NTZtoBO',
+'8NTZtoHQ',
+'8NTZtoTK',
+'8NTZtoWk',
+'8NTZtobF',
+'8NTZtowS',
+'8NTZtoy6',
+'8NTZtom9',
+'8NTZtoOf',
+'8NTZtoNc',
+'8NTZtoGl',
+'8NTZtoLx',
+'8NTZtoid',
+'8NTZtoKc',
+'8NTZtoIc',
+'8NTZtoCA',
+'8NTZs9yp',
+'8NTZs9t0',
+'8NTZs9va',
+'8NTZs_G1',
+'8NTZs9wm',
+'8NTZs9ae',
+'8NTZs9TS',
+'8NTZs3-g',
+'8NTZs9nJ',
+'8NTZs9ga',
+'8NTZs8N_',
+'8NTZs8nE',
+'8NTZs8uT',
+'8NTZs-hl',
+'8NTZs-mV',
+'8NTZs-2r',
+'8NTZs-U_',
+'8NTZs3_6',
+'8NTZs9c9',
+'8NTZs9ev']
+
+
+
+['8NTZEo1h',
+'8NTZEpiU',
+'8NTZEpmw',
+'8NTZEpn_',
+'8NTZEp8m',
+'8NTZEsqZ',
+'8NTZEsu_',
+'8NTZEuRh',
+'8NTZEuXa',
+'8NTZEtio',
+'8NTZEnqx',
+'8NTZEniW',
+'8NTZElvn',
+'8NTZEnXG',
+'8NTZElNu',
+'8NTZEP7L',
+'8NTZEPpi',
+'8NTZEOzr',
+'8NTZEOmt',
+'8NTZEL2N',
+'8NTZEL7W',
+'8NTZEkAU',
+'8NTZEkQu',
+'8NTZEkXn',
+'8NTZEk0v',
+'8NTZEknE',
+'8NTZEhfL',
+'8NTZEhn8',
+'8NTZEh8W',
+'8NTZEksz',
+'8NTZEk8d',
+'8NTZEmbF',
+'8NTZEmD-',
+'8NTZEjVI',
+'8NTZEhvs',
+'8NTZEjG8',
+'8NTZEjZD',
+'8NTZEj1z',
+'8NTZEmmo',
+'8NTZEm-B',
+'8NTZEsbn',
+'8NTZEsnO',
+'8NTZEshp',
+'8NTZEpV9',
+'8NTZEj4x',
+'8NTZEpN4']

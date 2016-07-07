@@ -37,8 +37,8 @@ def process(text):
         text = MyText(' '.join(morphed_words))
         for word in text.words: print(word, word.polarity)
 
-        spolarity = sum([word.polarity for word in text.words])
-        morphed_words = [{'w': word, 'p': word.polarity} for word in text.words]
+        spolarity = int(sum([word.polarity for word in text.words]))
+        morphed_words = [{'w': str(word), 'p': int(word.polarity)} for word in text.words]
 
         return {'morphed_words': morphed_words, 'spolarity': spolarity}
     except:

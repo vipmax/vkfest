@@ -1,11 +1,13 @@
+# coding=utf-8
+
 import pickle
 import tarfile
 import sys
 import io
 import tarfile
 
-reload(sys)
-sys.setdefaultencoding('UTF8')
+# reload(sys)
+# sys.setdefaultencoding('UTF8')
 
 # extract dictionary package
 tar = tarfile.open("/home/maxpetrov/polyglot_data/sentiment2/ru/ru.sent.pkl.tar.bz2")
@@ -29,11 +31,11 @@ dictionary_words_values = list()
 # add new words to dictionary
 for i in range(len(new_words)):
     if new_words[i] not in dictionary_words:
-        print 'adding ', new_words[i], new_words_values[i]
+        print('adding ', new_words[i], new_words_values[i])
         dictionary_words.extend([new_words[i]])
         dictionary_words_values.extend([new_words_values[i]])
     else:
-        print 'already exist word =', new_words[i]
+        print('already exist word =', new_words[i])
 
 # write new dictionary to pickle file
 result = (dictionary_words, dictionary_words_values)

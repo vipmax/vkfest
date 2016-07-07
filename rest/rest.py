@@ -38,8 +38,8 @@ class MainHandler(tornado.web.RequestHandler):
         from_timestamp = int(self.get_argument('from_timestamp'))
         count = int(self.get_argument('count'))
         print('getdata request. from_timestamp = {0} count = {1}'.format(from_timestamp, count))
-
-        posts = [post.data for post in posts_storage.get(from_timestamp, count)]
+        posts = posts_storage.get(from_timestamp, count)
+        posts = [post.data for post in posts]
         print("response with {0} posts".format(len(posts)))
         self.write({'posts': posts})
 
