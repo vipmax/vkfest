@@ -7,7 +7,7 @@ import requests
 from datetime import datetime
 
 vkapi = vk.API(vk.Session(), v='5.20', lang='ru', timeout=100)
-vk_posts_collection = pymongo.MongoClient(host="192.168.13.110")['Test']['vk_photos_collection']
+vk_photos_collection = pymongo.MongoClient(host="192.168.13.110")['Test']['vk_photos_collection']
 
 
 def get_photo_ids(geohash='8NTZtoXr'):
@@ -75,7 +75,6 @@ all_tags = ['8NTZEo1h', '8NTZEpiU', '8NTZEpmw', '8NTZEpn_', '8NTZEp8m', '8NTZEsq
 print(len(all_tags))
 
 all_photo_ids = 0
-all_photos_with_post = 0
 photos_count = 0
 timeout = 100
 
@@ -88,15 +87,15 @@ def start_geohash_crawler(geohash, timeout):
         all_photo_ids += len(photo_ids)
         photos = get_photos(photo_ids=','.join(photo_ids))
 
-        all_photos_with_post += len(photos)
+        for p in photos: vk_photos_collection.update({'_id': p['id']}, {'$set': p}, True, False)
 
-        print("{} геохеш = {} максимум {}, {} добавлено, {} всего фото, всего с постами {}".format(
+
+        print("{} геохеш = {} максимум {}, {} добавлено, {} всего фото".format(
             datetime.now(),
             geohash,
             photos_count,
             len(photo_ids),
-            all_photo_ids,
-            all_photos_with_post))
+            all_photo_ids))
         return len(photo_ids)
     except Exception as e:
         print(e)
@@ -105,19 +104,22 @@ def start_geohash_crawler(geohash, timeout):
 
 if __name__ == '__main__':
     while True:
-        all_photo_ids = 0
-        all_photos_with_post = 0
-        photos_count = 0
-        with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
-            i = 0
-            futures = {executor.submit(start_geohash_crawler, tag, timeout): tag for tag in list(all_tags)}
-            for future in concurrent.futures.as_completed(futures):
-                url = futures[future]
-                try:
-                    data = future.result()
-                    i += 1
-                    print(u'{} {} added {} post'.format(i, url, data))
-                except Exception as e:
-                    print(u"{} generated an exception {}".format(url, e))
+        try:
+            all_photo_ids = 0
+            all_photos_with_post = 0
+            photos_count = 0
+            with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+                i = 0
+                futures = {executor.submit(start_geohash_crawler, tag, timeout): tag for tag in list(all_tags)}
+                for future in concurrent.futures.as_completed(futures):
+                    url = futures[future]
+                    try:
+                        data = future.result()
+                        i += 1
+                        print(u'{} {} added {} post'.format(i, url, data))
+                    except Exception as e:
+                        print(u"{} generated an exception {}".format(url, e))
 
-        time.sleep(10)
+            time.sleep(60)
+        except:
+            pass
