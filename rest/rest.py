@@ -10,6 +10,8 @@ import json
 import posts_storage
 import sentiment_analisys
 
+import db
+
 
 class WSHandler(tornado.websocket.WebSocketHandler):
     def data_received(self, chunk):
@@ -30,7 +32,7 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         return True
 
 
-class MainHandler(tornado.web.RequestHandler):
+class GetDataHandler(tornado.web.RequestHandler):
     def data_received(self, chunk):
         print(chunk)
 
@@ -43,17 +45,32 @@ class MainHandler(tornado.web.RequestHandler):
         print("response with {0} posts".format(len(posts)))
         self.write({'posts': posts})
 
+class GetDataHandler2(tornado.web.RequestHandler):
+    def data_received(self, chunk):
+        print(chunk)
+
+    def get(self):
+        start_timestamp = int(self.get_argument('start_timestamp'))
+        end_timestamp = int(self.get_argument('end_timestamp'))
+        print('getdata request. from_timestamp = {0} count = {1}'.format(start_timestamp, end_timestamp))
+
+        posts = db.get(start_timestamp, end_timestamp)
+
+        print("response with {0} posts".format(len(posts)))
+        self.write({'posts': posts})
+
 application = tornado.web.Application([
     (r'/ws', WSHandler),
-    (r'/getdata', MainHandler),
+    (r'/getdata', GetDataHandler),
+    (r'/getdata2', GetDataHandler2),
     (r"/(.*)", tornado.web.StaticFileHandler, {"path": "data/index.html"})
 ])
 
 if __name__ == "__main__":
     http_server = tornado.httpserver.HTTPServer(application)
-    http_server.listen(8888)
+    http_server.listen(9999)
     myIP = socket.gethostbyname(socket.gethostname())
-    print(u'*** Server Started at {0:s}:8888'.format(myIP))
+    print(u'*** Server Started at {0:s}:9999'.format(myIP))
     tornado.ioloop.IOLoop.instance().start()
 
 

@@ -6,6 +6,7 @@ import sentiment_analisys
 from post import Post
 import pymongo
 import time
+import db
 
 buffer = SortedSet()
 lock = threading.Lock()
@@ -15,16 +16,12 @@ def add_toBuffer(post):
     if post not in buffer:
         sentiment_result = sentiment_analisys.process(post['text'])
         post['sentiment_result'] = sentiment_result
-        # lock.acquire()
-        # critical section start
         if len(buffer) > 10000:
             print('deleting ' + str(buffer[0]))
             del buffer[0]
-
         buffer.add(post)
+        db.save(post.data)
         print('buffer len = {}'.format(len(buffer)))
-        # critical section end
-        # lock.release()
 
 
 def get(from_timestamp, count):

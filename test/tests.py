@@ -6,6 +6,8 @@ import re
 import requests
 import vk
 from datetime import datetime
+import concurrent.futures
+
 
 #
 
@@ -75,8 +77,8 @@ def grid_analysing():
         destination = distance.destination(point=current_point, bearing=180)
         current_point = geopy.Point(destination.latitude, destination.longitude)
         current_posts = extract_posts(current_point.latitude, current_point.longitude)
-        print("{0}, {1}".format(str(destination.latitude), str(destination.longitude)), len(first_posts),\
-            len(current_posts), len(first_posts.intersection(current_posts)))
+        print("{0}, {1}".format(str(destination.latitude), str(destination.longitude)), len(first_posts), \
+              len(current_posts), len(first_posts.intersection(current_posts)))
         first_posts = current_posts
 
 
@@ -118,131 +120,105 @@ def jdon_test():
 
 
 
-geohash = '8NTZtoXr'
 
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0',
-    'Accept': 'application/json, text/javascript, */*; q=0.01',
-    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    'X-Requested-With': 'XMLHttpRequest'
-}
-
-data = {
-    "act": "show_photo_more",
-    "al": 1,
-    "geohash": geohash,
-    "offset": 0,
-    "photo_skip": '0_',
-}
-
-s = requests.Session()
-
-content = s.post('https://vk.com/al_places.php', data=data, headers=headers)
-
-html = content.content.decode('utf-8')
-
-prog = re.compile('href="\/photo(\w+)"')
-
-
-photo_ids = list(prog.findall(html))
-
-for p in photo_ids:
-    print(p)
+import vk
+import re
+import requests
+import time
+from datetime import datetime
 
 vkapi = vk.API(vk.Session(), v='5.20', lang='ru', timeout=100)
-photos = vkapi.photos.getById(photos=','.join(photo_ids))
-
-for p in photos:
-    print(p)
 
 
+def get_photo_ids(geohash='8NTZtoXr'):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0',
+        'Accept': 'application/json, text/javascript, */*; q=0.01',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'X-Requested-With': 'XMLHttpRequest'
+    }
+
+    data = {
+        "act": "show_photo_more",
+        "al": 1,
+        "geohash": geohash,
+        "offset": 0,
+        "photo_skip": '0_',
+    }
+
+    content = requests.Session().post('https://vk.com/al_places.php', data=data, headers=headers)
+    html = content.content.decode('utf-8')
+    prog = re.compile('href="\/photo(\w+)"')
+    photo_ids = set(prog.findall(html))
+
+    return photo_ids
 
 
-['8NTZtoXr',
-'8NTZtoc8',
-'8NTZto0w',
-'8NTZtoBO',
-'8NTZtoHQ',
-'8NTZtoTK',
-'8NTZtoWk',
-'8NTZtobF',
-'8NTZtowS',
-'8NTZtoy6',
-'8NTZtom9',
-'8NTZtoOf',
-'8NTZtoNc',
-'8NTZtoGl',
-'8NTZtoLx',
-'8NTZtoid',
-'8NTZtoKc',
-'8NTZtoIc',
-'8NTZtoCA',
-'8NTZs9yp',
-'8NTZs9t0',
-'8NTZs9va',
-'8NTZs_G1',
-'8NTZs9wm',
-'8NTZs9ae',
-'8NTZs9TS',
-'8NTZs3-g',
-'8NTZs9nJ',
-'8NTZs9ga',
-'8NTZs8N_',
-'8NTZs8nE',
-'8NTZs8uT',
-'8NTZs-hl',
-'8NTZs-mV',
-'8NTZs-2r',
-'8NTZs-U_',
-'8NTZs3_6',
-'8NTZs9c9',
-'8NTZs9ev']
+def get_photos(photo_ids):
+    return vkapi.photos.getById(photos=photo_ids)
 
 
+def get_photos_with_posts(photo_ids):
+    return list(filter(lambda p: 'post_id' in p, vkapi.photos.getById(photos=photo_ids)))
 
-['8NTZEo1h',
-'8NTZEpiU',
-'8NTZEpmw',
-'8NTZEpn_',
-'8NTZEp8m',
-'8NTZEsqZ',
-'8NTZEsu_',
-'8NTZEuRh',
-'8NTZEuXa',
-'8NTZEtio',
-'8NTZEnqx',
-'8NTZEniW',
-'8NTZElvn',
-'8NTZEnXG',
-'8NTZElNu',
-'8NTZEP7L',
-'8NTZEPpi',
-'8NTZEOzr',
-'8NTZEOmt',
-'8NTZEL2N',
-'8NTZEL7W',
-'8NTZEkAU',
-'8NTZEkQu',
-'8NTZEkXn',
-'8NTZEk0v',
-'8NTZEknE',
-'8NTZEhfL',
-'8NTZEhn8',
-'8NTZEh8W',
-'8NTZEksz',
-'8NTZEk8d',
-'8NTZEmbF',
-'8NTZEmD-',
-'8NTZEjVI',
-'8NTZEhvs',
-'8NTZEjG8',
-'8NTZEjZD',
-'8NTZEj1z',
-'8NTZEmmo',
-'8NTZEm-B',
-'8NTZEsbn',
-'8NTZEsnO',
-'8NTZEshp',
-'8NTZEpV9',
-'8NTZEj4x',
-'8NTZEpN4']
+
+def get_photos_with_posts(photos):
+    return list(filter(lambda p: 'post_id' in p, photos))
+
+
+alphabet = set(map(chr, range(ord('a'), ord('z') + 1)))
+alphabet.update(set(map(chr, range(ord('A'), ord('Z') + 1))))
+alphabet.update(set(map(chr, range(ord('0'), ord('9') + 1))))
+alphabet.update({'-', '_'})
+
+all_tags = set()
+for c1 in alphabet:
+    for c2 in alphabet:
+        for c3 in alphabet:
+            all_tags.add("8NTZE" + c1 + c2 + c3)
+
+print(len(all_tags))
+
+all_photo_ids = set()
+all_photos_with_post = set()
+photos_count = 0
+timeout = 100
+
+
+def start_geohash_crawler(geohash, timeout):
+    try:
+        global photos_count
+        photo_ids = get_photo_ids(geohash)
+        photos_count += len(photo_ids)
+        all_photo_ids.update(photo_ids)
+        photos = get_photos(photo_ids=','.join(photo_ids))
+        posts = ['{}_{}'.format(p['owner_id'], p['post_id']) for p in photos if 'post_id' in p.keys()]
+
+        all_photos_with_post.update(posts)
+
+        print("{} геохеш = {} максимум {}, {} добавлено, {} всего фото, всего с постами {}".format(
+            datetime.now(),
+            geohash,
+            photos_count,
+            len(photo_ids),
+            len(all_photo_ids),
+            len(all_photos_with_post)))
+        return len(posts)
+    except Exception as e:
+        print(e)
+    return 0
+
+# while True:
+with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
+    i = 0
+    futures = {executor.submit(start_geohash_crawler, tag, timeout): tag for tag in list(all_tags)[:300]}
+    for future in concurrent.futures.as_completed(futures):
+        url = futures[future]
+        try:
+            data = future.result()
+            i += 1
+            print(u'{} {} added {} post'.format(i, url, data))
+        except Exception as e:
+            print(u"{} generated an exception {}".format(url, e))
+
+    # time.sleep(1)
