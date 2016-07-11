@@ -1,3 +1,4 @@
+# coding=utf-8
 import concurrent.futures
 import time
 import pymongo as pymongo
@@ -6,8 +7,15 @@ import re
 import requests
 from datetime import datetime
 
+import logging
+logger = logging.getLogger('rest')
+logger.setLevel(logging.INFO)
+logger.addHandler(logging.StreamHandler())
+# logging.basicConfig(filename='log.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 vkapi = vk.API(vk.Session(), v='5.20', lang='ru', timeout=100)
-vk_photos_collection = pymongo.MongoClient(host="192.168.13.110")['Test']['vk_photos_collection']
+vk_photos_collection = pymongo.MongoClient(host="192.168.13.110")['Test']['data']
 
 
 def get_photo_ids(geohash='8NTZtoXr'):
@@ -72,7 +80,7 @@ all_tags = ['8NTZEo1h', '8NTZEpiU', '8NTZEpmw', '8NTZEpn_', '8NTZEp8m', '8NTZEsq
             '8NTZErt_', '8NTZErwa', '8NTZErNT', '8NTZErWw', '8NTZErfr', '8NTZEuoB', '8NTZGBUf', '8NTZGEJO', '8NTZGEHO',
             '8NTZEutP', '8NTZGEzi', '8NTZGGBw', '8NTZGB3s', '8NTZEvls', '8NTZGFYW', '8NTZGHLN', '8NTZGMH4']
 
-print(len(all_tags))
+logging.info(len(all_tags))
 
 all_photo_ids = 0
 photos_count = 0
@@ -82,27 +90,35 @@ timeout = 100
 def start_geohash_crawler(geohash, timeout):
     try:
         global photos_count, all_photo_ids, all_photos_with_post
+
         photo_ids = get_photo_ids(geohash)
         photos_count += len(photo_ids)
         all_photo_ids += len(photo_ids)
         photos = get_photos(photo_ids=','.join(photo_ids))
 
-        for p in photos: vk_photos_collection.update({'_id': p['id']}, {'$set': p}, True, False)
+        added_count = 0
+        for p in photos:
+            ur = vk_photos_collection.update({'_id': p['id']}, {'$set': p}, True, False)
+            added_count += not ur['updatedExisting']
 
-
-        print("{} геохеш = {} максимум {}, {} добавлено, {} всего фото".format(
-            datetime.now(),
-            geohash,
-            photos_count,
-            len(photo_ids),
-            all_photo_ids))
-        return len(photo_ids)
+        logging.info("{} геохеш = {} {} добавлено, всего {} новых фото".format(
+                    datetime.now(),
+                    geohash,
+                    len(photo_ids),
+                    added_count))
+        return added_count
     except Exception as e:
-        print(e)
+        logging.info(e)
     return 0
 
 
 if __name__ == '__main__':
+    try:
+        pymongo.MongoClient(host="192.168.13.110")['Test'].create_collection('data', capped=True, size=99999999999)
+        logging.info("Table created")
+    except:
+        logging.info("Table already created")
+
     while True:
         try:
             all_photo_ids = 0
@@ -116,9 +132,9 @@ if __name__ == '__main__':
                     try:
                         data = future.result()
                         i += 1
-                        print(u'{} {} added {} post'.format(i, url, data))
+                        logging.info(u'{} {} added {} post'.format(i, url, data))
                     except Exception as e:
-                        print(u"{} generated an exception {}".format(url, e))
+                        logging.info(u"{} generated an exception {}".format(url, e))
 
             time.sleep(60)
         except:

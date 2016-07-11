@@ -1,4 +1,5 @@
 # coding=utf-8
+
 import re
 from polyglot.text import Text
 from polyglot.detect import Detector
@@ -32,16 +33,20 @@ def filter_text(text):
     return ' '.join(words)
 
 def process(text):
+    result = ''
     try:
         morphed_words = [morpher.parse(word)[0].normal_form for word in filter_text(text).split(' ')]
         text = MyText(' '.join(morphed_words))
-        for word in text.words: print(word, word.polarity)
+        # for word in text.words: print(word, word.polarity)
 
         spolarity = int(sum([word.polarity for word in text.words]))
         morphed_words = [{'w': str(word), 'p': int(word.polarity)} for word in text.words]
 
-        return {'morphed_words': morphed_words, 'spolarity': spolarity}
-    except:
-        return {'morphed_words': [], 'spolarity': 0}
+        result = {'morphed_words': morphed_words, 'spolarity': spolarity}
+    except Exception as e:
+        print(e)
+        result = {'morphed_words': [], 'spolarity': 0}
 
+    print(text, result)
+    return result
 

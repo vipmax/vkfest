@@ -4,7 +4,12 @@ class Post:
     def __init__(self, data):
         self.data = data
 
-        if 'attachments' in data:
+        if 'geo' in data.keys():
+            geo = data['geo']['coordinates'].split(' ')
+            data['lat'] = float(geo[0])
+            data['long'] = float(geo[1])
+
+        if 'attachments' in data.keys():
             for a in data['attachments']:
                 if a['type'] == 'photo':
                     sizes = list(filter(lambda p: p.startswith('photo'), a['photo'].keys()))
@@ -12,6 +17,10 @@ class Post:
                     data['photo_url'] = a['photo']['photo_' + str(maxsize)]
                     break
 
+        if 'photo_75' in data.keys():
+            sizes = list(filter(lambda p: p.startswith('photo'), data.keys()))
+            maxsize = max(list(map(lambda p: int(p.replace("photo_", '')), sizes)))
+            data['photo_url'] = data['photo_' + str(maxsize)]
 
     def get(self, key):
         return self.data[key]
