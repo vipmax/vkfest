@@ -1,12 +1,16 @@
 # coding=utf-8
 import threading
+from datetime import datetime
+
 import vk
 from sortedcontainers import SortedSet
-import sentiment_analisys
 from post import Post
 import pymongo
 import time
+
+import sentiment_analisys
 import db
+import vk_util
 
 import logging
 logger = logging.getLogger('rest')
@@ -18,11 +22,13 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 buffer = SortedSet()
 lock = threading.Lock()
 
+vkapi = vk.API(vk.Session(), v='5.20', lang='ru', timeout=100)
+
 
 def add_toBuffer(post):
     if post not in buffer:
-        sentiment_result = sentiment_analisys.process(post['text'])
-        post['sentiment_result'] = sentiment_result
+        post['sentiment_result'] = sentiment_analisys.process(post['text'])
+        post['owner_info'] = vk_util.get_profile(post['owner_id'])
 
         if len(buffer) >= 10000:
             logging.info('deleting ' + str(buffer[0]))
@@ -49,7 +55,6 @@ def get(from_timestamp, count):
 
 # just while testing
 def add_posts():
-    vkapi = vk.API(vk.Session(), v='5.20', lang='ru', timeout=100)
     posts = vkapi.newsfeed.search(q='#spb',
                                   latitude='59.939145',
                                   longitude='30.315699',
@@ -65,9 +70,11 @@ def add_posts():
 
 
 def stream_new_posts():
+    q = {'date': {'$gte': int(datetime.now().strftime("%s"))}}
+
     db = pymongo.MongoClient("192.168.13.110").Test
     coll = db.data
-    cursor = coll.find({}, cursor_type=pymongo.CursorType.TAILABLE_AWAIT)
+    cursor = coll.find(q, cursor_type=pymongo.CursorType.TAILABLE_AWAIT)
     while True:
         for doc in cursor:
             logging.info(doc)

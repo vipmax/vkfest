@@ -136,6 +136,6 @@ if __name__ == '__main__':
                     except Exception as e:
                         logging.info(u"{} generated an exception {}".format(url, e))
 
-            time.sleep(60)
+            time.sleep(10)
         except:
             pass
