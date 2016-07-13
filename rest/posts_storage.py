@@ -74,13 +74,13 @@ def stream_new_posts():
 
     db = pymongo.MongoClient("192.168.13.110").Test
     coll = db.data
-    cursor = coll.find(q, cursor_type=pymongo.CursorType.TAILABLE_AWAIT)
+    cursor = coll.find({}, cursor_type=pymongo.CursorType.TAILABLE_AWAIT)
     while True:
         for doc in cursor:
             logging.info(doc)
             add_toBuffer(Post(doc))
-        time.sleep(1)
-
+        time.sleep(0.5)
+        logging.info("")
 
 thread = threading.Thread(target=stream_new_posts)
 thread.start()

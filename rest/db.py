@@ -4,8 +4,7 @@ vk_data_with_polarity = pymongo.MongoClient(host="192.168.13.110")['Test']['data
 
 
 def save(post):
-    del post['_id']
-    vk_data_with_polarity.update({'_id': '{}_{}'.format(post['owner_id'], post['id'])}, {'$set': post}, True, False)
+    vk_data_with_polarity.update({'_id': post['_id']}, {'$set': post}, True, False)
 
 def get(start, end):
     datetime.fromtimestamp(start)

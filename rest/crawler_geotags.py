@@ -98,6 +98,7 @@ def start_geohash_crawler(geohash, timeout):
 
         added_count = 0
         for p in photos:
+            print(p)
             ur = vk_photos_collection.update({'_id': p['id']}, {'$set': p}, True, False)
             added_count += not ur['updatedExisting']
 

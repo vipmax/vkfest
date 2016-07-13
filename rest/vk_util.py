@@ -22,8 +22,8 @@ group_fields = """city, country, place, description, wiki_page, members_count,
 def get_profile(profile_id):
     try:
         if profile_id > 0:
-            return vkapi.users.get(user_ids=profile_id, fields=user_fields)
+            return vkapi.users.get(user_ids=profile_id, fields=user_fields)[0]
         else:
-            return vkapi.groups.getById(group_ids=-int(profile_id), fields=group_fields)
+            return vkapi.groups.getById(group_ids=-int(profile_id), fields=group_fields)[0]
     except:
         return {}

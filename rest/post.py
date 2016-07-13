@@ -4,6 +4,11 @@ class Post:
     def __init__(self, data):
         self.data = data
 
+        if 'post_type' not in data.keys():
+            data['type'] = "photo"
+        else:
+            data['type'] = "post"
+
         if 'geo' in data.keys():
             geo = data['geo']['coordinates'].split(' ')
             data['lat'] = float(geo[0])
@@ -21,6 +26,17 @@ class Post:
             sizes = list(filter(lambda p: p.startswith('photo'), data.keys()))
             maxsize = max(list(map(lambda p: int(p.replace("photo_", '')), sizes)))
             data['photo_url'] = data['photo_' + str(maxsize)]
+
+        if 'src_xxbig' in data.keys():
+            data['photo_url'] = data['src_xxbig']
+        elif 'src_xbig' in data.keys():
+            data['photo_url'] = data['src_xbig']
+        elif 'src_big' in data.keys():
+            data['photo_url'] = data['src_big']
+        elif 'src' in data.keys():
+            data['photo_url'] = data['src']
+
+
 
     def get(self, key):
         return self.data[key]
