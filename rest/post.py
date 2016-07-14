@@ -42,7 +42,7 @@ class Post:
         return self.data[key]
 
     def __lt__(self, other):
-        return int(self.data['date']) < int(other.data['date'])
+        return int(self.data['added_time']) < int(other.data['added_time'])
 
     def __eq__(self, other):
         return self.data['owner_id'] == other.data['owner_id'] and \
@@ -52,11 +52,12 @@ class Post:
         return hash(self.data['owner_id']) ^ hash(self.data['id'])
 
     def __str__(self):
-        return u'Post(id={}_{},text={},date={})'. \
+        return u'Post(id={}_{},text={},date={} added_time={})'. \
             format(self.data['owner_id'],
                    self.data['id'],
                    self.data['text'][:20].replace('\n',' ').encode("utf-8"),
-                   int(self.data['date']))
+                   int(self.data['date']),
+                   self.data["added_time"])
 
 
     def __getitem__(self, item):

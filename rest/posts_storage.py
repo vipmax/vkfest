@@ -34,6 +34,7 @@ def add_toBuffer(post):
             logging.info('deleting ' + str(buffer[0]))
             del buffer[0]
 
+        post["added_time"] = int(datetime.now().strftime("%s"))
         buffer.add(post)
         db.save(post.data)
         logging.info('buffer len = {}'.format(len(buffer)))
@@ -46,10 +47,10 @@ def get(from_timestamp, count):
             logging.info(d['date'])
         return data
 
-    index = buffer.bisect_left(Post({'date': from_timestamp}))
+    index = buffer.bisect_left(Post({'added_time': from_timestamp}))
     data = buffer[index: index + count]
     for d in data:
-        logging.info(d['date'])
+        logging.info(d['added_time'])
     return data
 
 
@@ -74,7 +75,7 @@ def stream_new_posts():
 
     db = pymongo.MongoClient("192.168.13.110").Test
     coll = db.data
-    cursor = coll.find({}, cursor_type=pymongo.CursorType.TAILABLE_AWAIT)
+    cursor = coll.find(q, cursor_type=pymongo.CursorType.TAILABLE_AWAIT)
     while True:
         for doc in cursor:
             logging.info(doc)
