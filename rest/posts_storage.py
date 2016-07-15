@@ -11,6 +11,7 @@ import time
 import sentiment_analisys
 import db
 import vk_util
+import poligons
 
 import logging
 logger = logging.getLogger('rest')
@@ -35,6 +36,11 @@ def add_toBuffer(post):
             del buffer[0]
 
         post["added_time"] = int(datetime.now().strftime("%s"))
+        try:
+            post['zone'] = poligons.get_zone(post['lat'], post['long'])
+        except:
+            post['zone'] = "nozone"
+
         buffer.add(post)
         db.save(post.data)
         logging.info('buffer len = {}'.format(len(buffer)))
@@ -73,9 +79,9 @@ def add_posts():
 def stream_new_posts():
     q = {'date': {'$gte': int(datetime.now().strftime("%s"))}}
 
-    db = pymongo.MongoClient("192.168.13.110").Test
+    db = pymongo.MongoClient("192.168.13.133").VkFest
     coll = db.data
-    cursor = coll.find(q, cursor_type=pymongo.CursorType.TAILABLE_AWAIT)
+    cursor = coll.find({}, cursor_type=pymongo.CursorType.TAILABLE_AWAIT)
     while True:
         for doc in cursor:
             logging.info(doc)

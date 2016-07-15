@@ -1,6 +1,6 @@
 import pymongo
 from datetime import datetime
-vk_data_with_polarity = pymongo.MongoClient(host="192.168.13.110")['Test']['data_with_polarity_collection']
+vk_data_with_polarity = pymongo.MongoClient(host="192.168.13.133")['VkFest']['data_with_polarity_collection']
 
 
 def save(post):

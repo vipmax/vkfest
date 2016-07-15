@@ -11,6 +11,11 @@ logger.addHandler(logging.StreamHandler())
 # logging.basicConfig(filename='log.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
+try:
+    pymongo.MongoClient(host="192.168.13.133")['VkFest'].create_collection('data', capped=True, size=99999999999)
+    logging.info("Table created")
+except:
+    logging.info("Table already created")
 
 
 tags = [u'#spb', u'#saint', u'#питер', u'#спб', u'#санктпетербург', u'#санкт-петербург']
@@ -19,7 +24,7 @@ timeout = 100
 
 def task(tag, request_timeout):
     vkapi = vk.API(vk.Session(), v='5.20', lang='ru', timeout=request_timeout)
-    vk_posts_collection = pymongo.MongoClient(host="192.168.13.110")['Test']['data']
+    vk_posts_collection = pymongo.MongoClient(host="192.168.13.133")['VkFest']['data']
 
     added_count = 0
     try:
@@ -52,10 +57,4 @@ def start():
 
 
 if __name__ == '__main__':
-    try:
-        pymongo.MongoClient(host="192.168.13.110")['Test'].create_collection('data', capped=True, size=99999999999)
-        logging.info("Table created")
-    except:
-        logging.info("Table already created")
-
     start()
