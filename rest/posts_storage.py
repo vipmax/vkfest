@@ -17,7 +17,7 @@ import logging
 logger = logging.getLogger('rest')
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.StreamHandler())
-# logging.basicConfig(filename='log.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='/var/log/rest.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 buffer = SortedSet()
@@ -81,7 +81,7 @@ def stream_new_posts():
 
     db = pymongo.MongoClient("192.168.13.133").VkFest
     coll = db.data
-    cursor = coll.find({}, cursor_type=pymongo.CursorType.TAILABLE_AWAIT)
+    cursor = coll.find(q, cursor_type=pymongo.CursorType.TAILABLE_AWAIT)
     while True:
         for doc in cursor:
             logging.info(doc)

@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger('rest')
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
-# logging.basicConfig(filename='log.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='/var/log/rest.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 vkapi = vk.API(vk.Session(), v='5.20', lang='ru', timeout=100)

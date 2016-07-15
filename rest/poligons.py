@@ -470,7 +470,7 @@ def get_zone(lat, lon):
     for zone in zones:
         contains = zone['polygon'].contains(Point(lat, lon))
         if contains:
-            print(lat, lon, zone['zone'], contains)
+            # print(lat, lon, zone['zone'], contains)
             return zone['zone']
 
     return "nozone"

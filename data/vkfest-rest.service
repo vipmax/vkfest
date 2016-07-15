@@ -1,0 +1,22 @@
+[nano@node13n SNCrawler]$ sudo cat /lib/systemd/system/vkfest-rest.service
+
+
+[Unit]
+Description=VkFest Rest Service
+
+[Service]
+User=nano
+WorkingDirectory=/home/nano/VkFestApp/vkfest/rest
+ExecStart=/home/nano/anaconda3/bin/python rest.py
+ExecStop=/bin/kill -TERM $MAINPID
+Restart=always
+Type=idle
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+sudo systemctl daemon-reload
+sudo systemctl enable vkfest-rest.service
+sudo systemctl start vkfest-rest.service

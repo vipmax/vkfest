@@ -44,9 +44,9 @@ def process(text):
 
         result = {'morphed_words': morphed_words, 'spolarity': spolarity}
     except Exception as e:
-        print(e)
+        # print(e)
         result = {'morphed_words': [], 'spolarity': 0}
 
-    print(text, result)
+    # print(text, result)
     return result
 
