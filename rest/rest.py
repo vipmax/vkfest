@@ -16,7 +16,7 @@ import logging
 logger = logging.getLogger('rest')
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.StreamHandler())
-logging.basicConfig(filename='/var/log/rest.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='/home/nano/VkFestApp/vkfest/log.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class WSHandler(tornado.websocket.WebSocketHandler):

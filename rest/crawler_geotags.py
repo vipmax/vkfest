@@ -11,11 +11,11 @@ import logging
 logger = logging.getLogger('rest')
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
-logging.basicConfig(filename='/var/log/rest.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(filename='/home/nano/VkFestApp/vkfest/log.txt', level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 vkapi = vk.API(vk.Session(), v='5.20', lang='ru', timeout=100)
-vk_photos_collection = pymongo.MongoClient(host="192.168.13.110")['Test']['data']
+vk_photos_collection = pymongo.MongoClient(host="192.168.13.133")['Test']['data']
 
 
 def get_photo_ids(geohash='8NTZtoXr'):
@@ -115,7 +115,7 @@ def start_geohash_crawler(geohash, timeout):
 
 if __name__ == '__main__':
     try:
-        pymongo.MongoClient(host="192.168.13.110")['Test'].create_collection('data', capped=True, size=99999999999)
+        pymongo.MongoClient(host="192.168.13.133")['VkFest'].create_collection('data', capped=True, size=99999999999)
         logging.info("Table created")
     except:
         logging.info("Table already created")
